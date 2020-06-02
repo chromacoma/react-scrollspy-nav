@@ -90,7 +90,7 @@ class ScrollspyNav extends Component {
    * @param {String} sectionID
    */
   getNavLinkElement(sectionID) {
-    return document.querySelector(`a[href='${this.hashIdentifier}${sectionID}']`);
+    return document.querySelector(`a[href$='${this.hashIdentifier}${sectionID}']`);
   }
 
   /**
