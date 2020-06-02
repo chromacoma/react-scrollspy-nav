@@ -12,6 +12,7 @@
     "start": "webpack-dev-server --mode development",
     "test": "jest",
     "updateSnapshot": "jest --updateSnapshot",
+    "prepare": "npm run build",
     "build": "webpack --mode production && npm run test",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist/"
