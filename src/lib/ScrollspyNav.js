@@ -25,6 +25,9 @@ class ScrollspyNav extends Component {
       this.homeDefaultLink = "/";
       this.hashIdentifier = "#";
     }
+    
+    this.observer = null;
+    this.asyncTimerId = null;
   }
 
   /**
@@ -35,7 +38,9 @@ class ScrollspyNav extends Component {
     let scrollSectionOffsetTop;
     this.scrollTargetIds.forEach((sectionID, index) => {
       if (!document.getElementById(sectionID)) {
-        console.warn(`${SCROLLSPY_NAV_NAMESPACE}: no element with id ${sectionID} present in the DOM`);
+        // we've transitioned to another page, so clear this active class
+        // console.warn(`${SCROLLSPY_NAV_NAMESPACE}: x no element with id ${sectionID} present in the DOM`);
+        this.getNavLinkElement(sectionID).classList.remove(this.activeNavClass);
         return;
       }
 
@@ -98,7 +103,7 @@ class ScrollspyNav extends Component {
    * @param {String} navHref
    */
   getNavToSectionID(navHref) {
-    return navHref.includes(this.hashIdentifier) ? navHref.replace(this.hashIdentifier, "") : "";
+    return navHref.includes(this.hashIdentifier) ? navHref.split(this.hashIdentifier).pop() : "";
   }
 
   /**
@@ -113,6 +118,26 @@ class ScrollspyNav extends Component {
     });
   }
 
+  getElAndScroll(sectionID) {
+    const element = document.getElementById(sectionID);
+    if (element !== null) {
+      let scrollTargetPosition = document.getElementById(sectionID).offsetTop - (this.headerBackground ? document.querySelector("div[data-nav='list']").scrollHeight : 0);
+      this.scrollTo(window.pageYOffset, scrollTargetPosition + this.offset, this.scrollDuration);
+      this.reset();
+      return true;
+    }
+    return false;
+  }
+  
+  reset() {
+    if (this.observer !== null) this.observer.disconnect();
+    if (this.asyncTimerId !== null) {
+      window.clearTimeout(this.asyncTimerId);
+      this.asyncTimerId = null;
+    }
+  }
+  
+
   componentDidMount() {
     if (document.querySelector(`a[href='${this.homeDefaultLink}#']`)) {
       document.querySelector(`a[href='${this.homeDefaultLink}#']`).addEventListener("click", (event) => {
@@ -124,17 +149,34 @@ class ScrollspyNav extends Component {
 
     document.querySelector("div[data-nav='list']").querySelectorAll("a").forEach( (navLink) => {
       navLink.addEventListener("click", (event) => {
-        event.preventDefault();
         let sectionID = this.getNavToSectionID(navLink.getAttribute("href"));
-
         if(sectionID) {
           if (document.getElementById(sectionID)) {
+            event.preventDefault();
             let scrollTargetPosition = document.getElementById(sectionID).offsetTop - (this.headerBackground ? document.querySelector("div[data-nav='list']").scrollHeight : 0);
             this.scrollTo(window.pageYOffset, scrollTargetPosition + this.offset, this.scrollDuration);
           } else {
-            console.warn(`${SCROLLSPY_NAV_NAMESPACE}: no element with id ${sectionID} present in the DOM`);
+            // navigating to a new page - let the dom update then scroll
+            // Push onto callback queue so it runs after the DOM is updated
+            window.setTimeout(() => {
+              if (this.getElAndScroll(sectionID) === false) {
+                if (this.observer === null) {
+                  this.observer = new MutationObserver(() => getElAndScroll(MutationObserver));
+                }
+                observer.observe(document, {
+                  attributes: true,
+                  childList: true,
+                  subtree: true,
+                });
+                // if the element doesn't show up in 10 seconds, stop checking
+                this.asyncTimerId = window.setTimeout(() => {
+                  this.reset();
+                }, 10000);
+              }
+            }, 0);
           }
         } else {
+          // home (/) clicked
           this.scrollTo(window.pageYOffset, 0, this.scrollDuration);
         }
       });
