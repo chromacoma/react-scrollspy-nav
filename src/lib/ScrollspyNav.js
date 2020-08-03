@@ -130,7 +130,7 @@ class ScrollspyNav extends Component {
   }
   
   reset() {
-    if (this.observer !== null) this.observer.disconnect();
+    if (typeof(this.observer) !== 'undefined' && this.observer !== null) this.observer.disconnect();
     if (this.asyncTimerId !== null) {
       window.clearTimeout(this.asyncTimerId);
       this.asyncTimerId = null;
@@ -160,7 +160,7 @@ class ScrollspyNav extends Component {
             // Push onto callback queue so it runs after the DOM is updated
             window.setTimeout(() => {
               if (this.getElAndScroll(sectionID) === false) {
-                if (this.observer === null) {
+                if (typeof(this.observer) === 'undefined' || this.observer === null) {
                   this.observer = new MutationObserver(() => getElAndScroll(MutationObserver));
                 }
                 observer.observe(document, {
