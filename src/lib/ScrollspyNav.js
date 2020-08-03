@@ -130,7 +130,7 @@ class ScrollspyNav extends Component {
   }
   
   reset() {
-    if (typeof(this.observer) !== 'undefined' && this.observer !== null) this.observer.disconnect();
+    if (this.observer !== null) this.observer.disconnect();
     if (this.asyncTimerId !== null) {
       window.clearTimeout(this.asyncTimerId);
       this.asyncTimerId = null;
@@ -160,7 +160,7 @@ class ScrollspyNav extends Component {
             // Push onto callback queue so it runs after the DOM is updated
             window.setTimeout(() => {
               if (this.getElAndScroll(sectionID) === false) {
-                if (typeof(this.observer) === 'undefined' || this.observer === null) {
+                if (this.observer === null) {
                   this.observer = new MutationObserver(() => getElAndScroll(MutationObserver));
                 }
                 observer.observe(document, {
@@ -173,7 +173,7 @@ class ScrollspyNav extends Component {
                   this.reset();
                 }, 10000);
               }
-            }, 0);
+            }, 500);
           }
         } else {
           // home (/) clicked
