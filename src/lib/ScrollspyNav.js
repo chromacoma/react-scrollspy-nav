@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-const SCROLLSPY_NAV_NAMESPACE = "react-scrollspy-nav";
-
+const SCROLLSPY_NAV_NAMESPACE = 'react-scrollspy-nav';
 
 /**
  * ScrollspyNav component. Refer to below for the props it receives
@@ -13,19 +12,19 @@ class ScrollspyNav extends Component {
     this.scrollTargetIds = this.props.scrollTargetIds;
     this.activeNavClass = this.props.activeNavClass;
     this.scrollDuration = Number(this.props.scrollDuration) || 1000;
-    this.headerBackground = this.props.headerBackground === "true" ? true : false;
+    this.headerBackground = this.props.headerBackground === 'true' ? true : false;
     this.offset = this.props.offset || 0;
 
     this.onScroll = this.onScroll.bind(this);
 
-    if(this.props.router && this.props.router === "HashRouter") {
-      this.homeDefaultLink = "#/";
-      this.hashIdentifier = "#/#";
+    if (this.props.router && this.props.router === 'HashRouter') {
+      this.homeDefaultLink = '#/';
+      this.hashIdentifier = '#/#';
     } else {
-      this.homeDefaultLink = "/";
-      this.hashIdentifier = "#";
+      this.homeDefaultLink = '/';
+      this.hashIdentifier = '#';
     }
-    
+
     this.observer = null;
     this.asyncTimerId = null;
   }
@@ -40,20 +39,30 @@ class ScrollspyNav extends Component {
       if (!document.getElementById(sectionID)) {
         // we've transitioned to another page, so clear this active class
         // console.warn(`${SCROLLSPY_NAV_NAMESPACE}: x no element with id ${sectionID} present in the DOM`);
-        this.getNavLinkElement(sectionID).classList.remove(this.activeNavClass);
+        if (this.getNavLinkElement(sectionID)) {
+          this.getNavLinkElement(sectionID).classList.remove(this.activeNavClass);
+        }
         return;
       }
 
-      scrollSectionOffsetTop = document.getElementById(sectionID).offsetTop - (this.headerBackground ? document.querySelector("div[data-nav='list']").scrollHeight : 0);
-  
-      if (window.pageYOffset - this.offset >= scrollSectionOffsetTop && window.pageYOffset < scrollSectionOffsetTop + document.getElementById(sectionID).scrollHeight) {
+      scrollSectionOffsetTop =
+        document.getElementById(sectionID).offsetTop -
+        (this.headerBackground ? document.querySelector("div[data-nav='list']").scrollHeight : 0);
+
+      if (
+        window.pageYOffset - this.offset >= scrollSectionOffsetTop &&
+        window.pageYOffset < scrollSectionOffsetTop + document.getElementById(sectionID).scrollHeight
+      ) {
         this.getNavLinkElement(sectionID).classList.add(this.activeNavClass);
-        this.clearOtherNavLinkActiveStyle(sectionID)
+        this.clearOtherNavLinkActiveStyle(sectionID);
       } else {
         this.getNavLinkElement(sectionID).classList.remove(this.activeNavClass);
       }
-  
-      if (window.innerHeight + window.pageYOffset >= document.body.scrollHeight && index === this.scrollTargetIds.length - 1) {
+
+      if (
+        window.innerHeight + window.pageYOffset >= document.body.scrollHeight &&
+        index === this.scrollTargetIds.length - 1
+      ) {
         this.getNavLinkElement(sectionID).classList.add(this.activeNavClass);
         this.clearOtherNavLinkActiveStyle(sectionID);
       }
@@ -61,11 +70,11 @@ class ScrollspyNav extends Component {
   }
 
   easeInOutQuad(current_time, start, change, duration) {
-      current_time /= duration/2;
-      if (current_time < 1) return change/2*current_time*current_time + start;
-      current_time--;
-      return -change/2 * (current_time*(current_time-2) - 1) + start;
-  };
+    current_time /= duration / 2;
+    if (current_time < 1) return (change / 2) * current_time * current_time + start;
+    current_time--;
+    return (-change / 2) * (current_time * (current_time - 2) - 1) + start;
+  }
 
   /**
    * Perform scroll animation with given start place, end place and duration
@@ -75,16 +84,16 @@ class ScrollspyNav extends Component {
    */
   scrollTo(start, to, duration) {
     let change = to - start,
-        currentTime = 0,
-        increment = 10;
+      currentTime = 0,
+      increment = 10;
 
     let animateScroll = () => {
-        currentTime += increment;
-        let val = this.easeInOutQuad(currentTime, start, change, duration);
-        window.scrollTo(0, val);
-        if(currentTime < duration) {
-            setTimeout(animateScroll, increment);
-        }
+      currentTime += increment;
+      let val = this.easeInOutQuad(currentTime, start, change, duration);
+      window.scrollTo(0, val);
+      if (currentTime < duration) {
+        setTimeout(animateScroll, increment);
+      }
     };
 
     animateScroll();
@@ -103,12 +112,12 @@ class ScrollspyNav extends Component {
    * @param {String} navHref
    */
   getNavToSectionID(navHref) {
-    return navHref.includes(this.hashIdentifier) ? navHref.split(this.hashIdentifier).pop() : "";
+    return navHref.includes(this.hashIdentifier) ? navHref.split(this.hashIdentifier).pop() : '';
   }
 
   /**
    * Clear the highlight style on the non-current viewed nav elements
-   * @param {String} excludeSectionID 
+   * @param {String} excludeSectionID
    */
   clearOtherNavLinkActiveStyle(excludeSectionID) {
     this.scrollTargetIds.map((sectionID, index) => {
@@ -121,14 +130,16 @@ class ScrollspyNav extends Component {
   getElAndScroll(sectionID) {
     const element = document.getElementById(sectionID);
     if (element !== null) {
-      let scrollTargetPosition = document.getElementById(sectionID).offsetTop - (this.headerBackground ? document.querySelector("div[data-nav='list']").scrollHeight : 0);
+      let scrollTargetPosition =
+        document.getElementById(sectionID).offsetTop -
+        (this.headerBackground ? document.querySelector("div[data-nav='list']").scrollHeight : 0);
       this.scrollTo(window.pageYOffset, scrollTargetPosition + this.offset, this.scrollDuration);
       this.reset();
       return true;
     }
     return false;
   }
-  
+
   reset() {
     if (this.observer !== null) this.observer.disconnect();
     if (this.asyncTimerId !== null) {
@@ -136,65 +147,65 @@ class ScrollspyNav extends Component {
       this.asyncTimerId = null;
     }
   }
-  
 
   componentDidMount() {
     if (document.querySelector(`a[href='${this.homeDefaultLink}#']`)) {
-      document.querySelector(`a[href='${this.homeDefaultLink}#']`).addEventListener("click", (event) => {
+      document.querySelector(`a[href='${this.homeDefaultLink}#']`).addEventListener('click', (event) => {
         event.preventDefault();
         this.scrollTo(window.pageYOffset, 0, this.scrollDuration);
-        window.location.hash = "";
+        window.location.hash = '';
       });
     }
 
-    document.querySelector("div[data-nav='list']").querySelectorAll("a").forEach( (navLink) => {
-      navLink.addEventListener("click", (event) => {
-        let sectionID = this.getNavToSectionID(navLink.getAttribute("href"));
-        if(sectionID) {
-          if (document.getElementById(sectionID)) {
-            event.preventDefault();
-            let scrollTargetPosition = document.getElementById(sectionID).offsetTop - (this.headerBackground ? document.querySelector("div[data-nav='list']").scrollHeight : 0);
-            this.scrollTo(window.pageYOffset, scrollTargetPosition + this.offset, this.scrollDuration);
-          } else {
-            // navigating to a new page - let the dom update then scroll
-            // Push onto callback queue so it runs after the DOM is updated
-            window.setTimeout(() => {
-              if (this.getElAndScroll(sectionID) === false) {
-                if (this.observer === null) {
-                  this.observer = new MutationObserver(() => getElAndScroll(MutationObserver));
+    document
+      .querySelector("div[data-nav='list']")
+      .querySelectorAll('a')
+      .forEach((navLink) => {
+        navLink.addEventListener('click', (event) => {
+          let sectionID = this.getNavToSectionID(navLink.getAttribute('href'));
+          if (sectionID) {
+            if (document.getElementById(sectionID)) {
+              event.preventDefault();
+              let scrollTargetPosition =
+                document.getElementById(sectionID).offsetTop -
+                (this.headerBackground ? document.querySelector("div[data-nav='list']").scrollHeight : 0);
+              this.scrollTo(window.pageYOffset, scrollTargetPosition + this.offset, this.scrollDuration);
+            } else {
+              // navigating to a new page - let the dom update then scroll
+              // Push onto callback queue so it runs after the DOM is updated
+              window.setTimeout(() => {
+                if (this.getElAndScroll(sectionID) === false) {
+                  if (this.observer === null) {
+                    this.observer = new MutationObserver(() => getElAndScroll(MutationObserver));
+                  }
+                  observer.observe(document, {
+                    attributes: true,
+                    childList: true,
+                    subtree: true,
+                  });
+                  // if the element doesn't show up in 10 seconds, stop checking
+                  this.asyncTimerId = window.setTimeout(() => {
+                    this.reset();
+                  }, 10000);
                 }
-                observer.observe(document, {
-                  attributes: true,
-                  childList: true,
-                  subtree: true,
-                });
-                // if the element doesn't show up in 10 seconds, stop checking
-                this.asyncTimerId = window.setTimeout(() => {
-                  this.reset();
-                }, 10000);
-              }
-            }, 500);
+              }, 500);
+            }
+          } else {
+            // home (/) clicked
+            this.scrollTo(window.pageYOffset, 0, this.scrollDuration);
           }
-        } else {
-          // home (/) clicked
-          this.scrollTo(window.pageYOffset, 0, this.scrollDuration);
-        }
+        });
       });
-    })
 
-    window.addEventListener("scroll", this.onScroll);
+    window.addEventListener('scroll', this.onScroll);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("scroll", this.onScroll);
+    window.removeEventListener('scroll', this.onScroll);
   }
 
   render() {
-    return(
-      <div data-nav="list">
-        { this.props.children }
-      </div>
-    );
+    return <div data-nav="list">{this.props.children}</div>;
   }
 }
 
